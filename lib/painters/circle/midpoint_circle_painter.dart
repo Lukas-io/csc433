@@ -25,7 +25,7 @@ class MidpointCirclePainter extends CustomPainter {
     double centerDy = (center.dy / interval).round() * interval.toDouble();
     Offset centerPoint = Offset(centerDx, centerDy);
 
-    canvas.drawCircle(centerPoint, radius.toDouble() + 4, centerPaint); //
+    canvas.drawCircle(centerPoint, radius.toDouble() + 4, centerPaint);
 
     // Call the Midpoint Circle algorithm
     _drawCircle(canvas, centerPoint, radius.toDouble(), paint);

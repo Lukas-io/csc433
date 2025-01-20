@@ -1,10 +1,19 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class DdaLinePainter extends CustomPainter {
-  final Offset start;
-  final Offset end;
+  final Offset? start;
+  final Offset? end;
 
-  DdaLinePainter({required this.start, required this.end});
+  final int interval;
+  final double canvasHeight;
+
+  DdaLinePainter(
+      {required this.start,
+      required this.end,
+      required this.canvasHeight,
+      required this.interval});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -12,26 +21,94 @@ class DdaLinePainter extends CustomPainter {
       ..color = Colors.blue // Color of the points
       ..style = PaintingStyle.fill;
 
-    // DDA Algorithm Implementation
-    double dx = end.dx - start.dx;
-    double dy = end.dy - start.dy;
+    bool onePoint = false;
+    bool twoPoint = false;
 
-    // Determine the number of steps needed
-    int steps = dx.abs() > dy.abs() ? dx.abs().round() : dy.abs().round();
+    if (start != null) {
+      onePoint = true;
+    }
+    if (end != null) {
+      twoPoint = true;
+    }
 
-    // Calculate the increments for x and y per step
-    double xIncrement = dx / steps;
-    double yIncrement = dy / steps;
+    if (onePoint) {
+      double dx = (start!.dx / interval).floor() * interval.toDouble();
+      double dy =
+          ((canvasHeight - start!.dy) / interval).floor() * interval.toDouble();
 
-    // Initial position
-    double x = start.dx;
-    double y = start.dy;
-    // Draw discrete points along the line
-    for (int i = 0; i <= steps; i++) {
-      // Plot each point as a small circle
-      canvas.drawCircle(Offset(x.roundToDouble(), y.roundToDouble()), 1, paint);
-      x += xIncrement;
-      y += yIncrement;
+      Rect rect = Rect.fromPoints(
+        Offset(dx, dy),
+        Offset(dx + interval, dy + interval),
+      );
+      canvas.drawRect(rect, paint);
+    }
+
+    if (twoPoint) {
+      // DDA Algorithm Implementation
+      int dx = (end!.dx / interval.toDouble()).floor() -
+          (start!.dx / interval.toDouble()).floor();
+      int dy = (end!.dy / interval.toDouble()).floor() -
+          (start!.dy / interval.toDouble()).floor();
+
+      int endDx = (end!.dx / interval).floor();
+      int endDy = ((canvasHeight - end!.dy) / interval).floor();
+      int startDx = (start!.dx / interval).floor();
+      int startDy = ((canvasHeight - start!.dy) / interval).floor();
+
+      // Determine the number of steps needed
+      int steps = max(dx.abs(), dy.abs());
+
+      // Initial position
+      double x = startDx.toDouble();
+      double y = startDy.toDouble();
+
+      print("STARTING: $steps");
+
+      void plotPoint(int xInt, int yInt) {
+        double x = xInt.toDouble() * interval;
+        double y = yInt.toDouble() * interval;
+        Rect rect = Rect.fromPoints(
+          Offset(x, y),
+          Offset(x + interval, y + interval),
+        );
+        canvas.drawRect(rect, paint);
+      }
+
+      double xDirection = dx / steps;
+      double yDirection = dy / steps;
+
+      // Draw discrete points along the line
+      for (int i = 1; i <= steps; i++) {
+        // double m = (x - endDx) != 0 ? ((y - endDy) / (x - endDx)).abs() : 0;
+
+        // int xDirection = endDx - startDx < 0 ? -1 : 1;
+        // int yDirection = endDy - startDy < 0 ? -1 : 1;
+
+        // print(m);
+        x += xDirection;
+        y -= yDirection;
+        plotPoint(x.round(), y.round());
+
+        // if (m > 1) {
+        //   y += yDirection;
+        //   if (m == 0) {
+        //     x += xDirection;
+        //   } else {
+        //     x += (1 / m) * xDirection;
+        //   }
+        //   plotPoint(x.round(), y.round());
+        // } else if (m == 1) {
+        //   y += yDirection;
+        //   x += xDirection;
+        //   plotPoint(x.round(), y.round());
+        // } else {
+        //   x += xDirection;
+        //   y += m * yDirection;
+        //   plotPoint(x.round(), y.round());
+        // }
+
+        // print({x.round(), 25 - y.round()});
+      }
     }
   }
 

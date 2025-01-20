@@ -17,7 +17,7 @@ class _CircleAlgorithmsScreenState extends State<CircleAlgorithmsScreen> {
   bool zoomEnabled = false;
   Offset centerOffset = const Offset(150, 150);
   int intervalGap = 40;
-  late final TransformationController _transformationController;
+  TransformationController? _transformationController;
   late final Size canvasSize;
 
   @override
@@ -46,8 +46,10 @@ class _CircleAlgorithmsScreenState extends State<CircleAlgorithmsScreen> {
             onPressed: () {
               setState(() {
                 zoomEnabled = !zoomEnabled;
+                _transformationController = TransformationController();
+
                 if (zoomEnabled == false) {
-                  _transformationController.value = Matrix4.identity();
+                  _transformationController = null;
                 }
               });
             },
@@ -109,9 +111,10 @@ class _CircleAlgorithmsScreenState extends State<CircleAlgorithmsScreen> {
             child: InteractiveViewer(
               // Minimum zoom scale
               boundaryMargin: const EdgeInsets.all(120.0),
-              maxScale: 20.0,
+              maxScale: 25.0,
               transformationController: _transformationController,
               scaleFactor: 4,
+              panEnabled: _transformationController != null,
               child: Container(
                 alignment: Alignment.topCenter,
                 padding:
